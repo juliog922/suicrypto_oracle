@@ -15,7 +15,8 @@ impl Config {
     /// Loads configuration from a JSON file.
     pub fn load_from_file(file_path: &str) -> Result<Self, AppError> {
         let path = Path::new(file_path);
-        let mut file = File::open(path).map_err(|e| AppError::FileError(format!("Error opening file {}: {}", file_path, e)))?;
+        let mut file = File::open(path)
+            .map_err(|e| AppError::FileError(format!("Error opening file {}: {}", file_path, e)))?;
 
         let mut contents = String::new();
         file.read_to_string(&mut contents)

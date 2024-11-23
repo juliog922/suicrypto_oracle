@@ -1,7 +1,7 @@
 pub mod application;
-pub mod infraestructure;
-pub mod domain;
 pub mod config;
+pub mod domain;
+pub mod infraestructure;
 
 use std::fmt;
 
@@ -10,28 +10,28 @@ use std::fmt;
 pub enum AppError {
     /// Error in TCP connection (e.g., binding or accepting a connection)
     TcpError(String),
-    
+
     /// Error while accepting a WebSocket connection
     WebSocketAcceptError(String),
-    
+
     /// Error while sending or receiving WebSocket messages
     WebSocketMessageError(String),
-    
+
     /// Error in the broadcast channel (e.g., sending messages to subscribers)
     BroadcastError(String),
-    
+
     /// Error while calling an external API
     ApiError(String),
-    
+
     /// Error while processing the response from an API
     ApiResponseError(String),
-    
+
     /// Unknown or unexpected error
     UnknownError(String),
-    
+
     /// Error while handling a file (e.g., reading, writing, or opening)
     FileError(String),
-    
+
     /// Error while processing a JSON response (e.g., parsing)
     JsonError(String),
 }

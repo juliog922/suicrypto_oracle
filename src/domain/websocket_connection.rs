@@ -1,10 +1,10 @@
 // websocket_connection.rs
-use tokio::net::TcpStream;
-use tokio_tungstenite::{accept_async, tungstenite::protocol::Message};
-use futures_util::{StreamExt, SinkExt};
-use log::info;
-use tokio::sync::broadcast;
 use crate::AppError;
+use futures_util::{SinkExt, StreamExt};
+use log::info;
+use tokio::net::TcpStream;
+use tokio::sync::broadcast;
+use tokio_tungstenite::{accept_async, tungstenite::protocol::Message};
 
 /// A WebSocket connection handler.
 pub struct WebSocketConnection {
@@ -26,7 +26,7 @@ impl WebSocketConnection {
     }
 
     /// Handles the WebSocket connection by reading and writing messages.
-    /// 
+    ///
     /// It listens for incoming messages from the server and forwards them to the client,
     /// and it also reads messages from the client.
     pub async fn run(mut self) -> Result<(), AppError> {
@@ -34,7 +34,7 @@ impl WebSocketConnection {
         let ws_stream = accept_async(self.stream)
             .await
             .map_err(|e| AppError::WebSocketAcceptError(e.to_string()))?;
-        
+
         let (mut write, mut read) = ws_stream.split();
 
         info!("New client connected.");
@@ -63,8 +63,8 @@ impl WebSocketConnection {
 
         // Await the completion of both tasks
         tokio::select! {
-            result = &mut send_task => if let Err(e) = result.map_err(|_| AppError::UnknownError("Error in send task".to_string()))? { return Err(e); },
-            result = &mut receive_task => if let Err(e) = result.map_err(|_| AppError::UnknownError("Error in receive task".to_string()))? { return Err(e); },
+            result = &mut send_task => result.map_err(|_| AppError::UnknownError("Error in send task".to_string()))??,
+            result = &mut receive_task => result.map_err(|_| AppError::UnknownError("Error in receive task".to_string()))??,
         }
 
         info!("Client disconnected.");

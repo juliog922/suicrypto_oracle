@@ -1,18 +1,13 @@
-use tokio::sync::broadcast;
 use dotenv::dotenv;
+use tokio::sync::broadcast;
 
-use suicrypto_oracle::{
-    config::Config,
-    application::client_manager::ClientManager,
-    AppError
-};
-
+use suicrypto_oracle::{application::client_manager::ClientManager, config::Config, AppError};
 
 // Main entry point of the program
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
-    dotenv().ok();  // Load environment variables
-    env_logger::init();  // Initialize logging
+    dotenv().ok(); // Load environment variables
+    env_logger::init(); // Initialize logging
 
     // Load the configuration
     let config = Config::load_from_file("tokens.json")?;
@@ -31,5 +26,3 @@ async fn main() -> Result<(), AppError> {
 
     Ok(())
 }
-
-

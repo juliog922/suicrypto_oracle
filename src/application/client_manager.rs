@@ -1,13 +1,10 @@
-use tokio::sync::broadcast;
 use log::{error, info, warn};
 use serde_json::Value;
+use tokio::sync::broadcast;
 
-use crate::{
-    AppError, 
-    domain::websocket_handler::WebSocketHandler
-};
+use crate::{domain::websocket_handler::WebSocketHandler, AppError};
 
-const COINGECKO_API_COINS: &'static str = "https://api.coingecko.com/api/v3/coins";
+const COINGECKO_API_COINS: &str = "https://api.coingecko.com/api/v3/coins";
 
 #[derive(Debug)]
 pub struct Client {
@@ -18,7 +15,11 @@ pub struct Client {
 
 impl Client {
     /// Creates a new client instance.
-    pub fn new(token_name: String, contract_address: String, tx: broadcast::Sender<(String, String)>) -> Self {
+    pub fn new(
+        token_name: String,
+        contract_address: String,
+        tx: broadcast::Sender<(String, String)>,
+    ) -> Self {
         Client {
             token_name,
             contract_address,
@@ -28,7 +29,11 @@ impl Client {
 
     /// Starts the client's task by establishing a WebSocket connection.
     pub async fn run(&self) {
-        let ws_handler = WebSocketHandler::new(self.token_name.clone(), self.contract_address.clone(), self.tx.clone());
+        let ws_handler = WebSocketHandler::new(
+            self.token_name.clone(),
+            self.contract_address.clone(),
+            self.tx.clone(),
+        );
         if let Err(e) = ws_handler.connect().await {
             error!("WebSocket connection error: {}", e);
         }
@@ -36,7 +41,7 @@ impl Client {
 }
 
 // Manages all clients
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ClientManager {
     clients: Vec<Client>,
 }
@@ -67,13 +72,18 @@ impl ClientManager {
             // Handle error if token is not found
             if let Some(error_message) = response.get("error").and_then(|e| e.as_str()) {
                 if error_message == "coin not found" {
-                    warn!("Token not found: {}. API response: {}", token, error_message);
+                    warn!(
+                        "Token not found: {}. API response: {}",
+                        token, error_message
+                    );
                     continue; // Skip to next token
                 }
             }
 
             // If no error, create the client
-            if let Some(contract_address) = response.pointer("/platforms/sui").and_then(|c| c.as_str()) {
+            if let Some(contract_address) =
+                response.pointer("/platforms/sui").and_then(|c| c.as_str())
+            {
                 let client = Client::new(token.clone(), contract_address.to_string(), tx.clone());
                 self.clients.push(client);
                 info!("Client created: {}", token);

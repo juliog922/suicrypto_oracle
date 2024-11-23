@@ -4,7 +4,7 @@
 async fn test_server_can_start() {
     use suicrypto_oracle::domain::websocket_server::WebSocketServer;
     use tokio::net::TcpListener;
-    
+
     // Use a dynamic port (0 will automatically select an available port)
     let address = "127.0.0.1:0"; // Dynamic port
     let server = WebSocketServer::new(address).expect("Error creating server");

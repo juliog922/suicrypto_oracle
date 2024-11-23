@@ -1,10 +1,10 @@
-use serde_json::Value;
 use chrono::{TimeZone, Utc};
 use log::debug;
+use serde_json::Value;
 
 use crate::AppError;
 
-const API_FETCH_PRICE: &'static str = "https://coins.llama.fi/prices/current/sui";
+const API_FETCH_PRICE: &str = "https://coins.llama.fi/prices/current/sui";
 
 // API Client responsible for fetching token prices.
 #[derive(Debug)]
@@ -34,29 +34,35 @@ impl ApiClient {
         let json: Value = serde_json::from_str(response)
             .map_err(|e| AppError::ApiResponseError(format!("JSON parsing error: {}", e)))?;
 
-        let coins = json
-            .get("coins")
-            .ok_or(AppError::ApiResponseError("Missing 'coins' key in response".to_string()))?;
+        let coins = json.get("coins").ok_or(AppError::ApiResponseError(
+            "Missing 'coins' key in response".to_string(),
+        ))?;
 
         let first_coin = coins
             .as_object()
             .and_then(|obj| obj.values().next())
             .ok_or(AppError::ApiResponseError("No coins found".to_string()))?;
 
-        let symbol = first_coin
-            .get("symbol")
-            .and_then(|s| s.as_str())
-            .ok_or(AppError::ApiResponseError("Missing symbol in response".to_string()))?;
-        let price = first_coin
-            .get("price")
-            .and_then(|p| p.as_f64())
-            .ok_or(AppError::ApiResponseError("Missing price in response".to_string()))?;
-        let timestamp = first_coin
-            .get("timestamp")
-            .and_then(|t| t.as_i64())
-            .ok_or(AppError::ApiResponseError("Missing timestamp in response".to_string()))?;
+        let symbol =
+            first_coin
+                .get("symbol")
+                .and_then(|s| s.as_str())
+                .ok_or(AppError::ApiResponseError(
+                    "Missing symbol in response".to_string(),
+                ))?;
+        let price =
+            first_coin
+                .get("price")
+                .and_then(|p| p.as_f64())
+                .ok_or(AppError::ApiResponseError(
+                    "Missing price in response".to_string(),
+                ))?;
+        let timestamp = first_coin.get("timestamp").and_then(|t| t.as_i64()).ok_or(
+            AppError::ApiResponseError("Missing timestamp in response".to_string()),
+        )?;
 
-        let date_time = Utc.timestamp_opt(timestamp, 0)
+        let date_time = Utc
+            .timestamp_opt(timestamp, 0)
             .single()
             .ok_or(AppError::ApiResponseError("Invalid timestamp".to_string()))?;
 
